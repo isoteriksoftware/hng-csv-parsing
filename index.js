@@ -31,7 +31,7 @@ fs.createReadStream(filePath)
     if (row["Filename"]) {
       const jsonData = {
         format: "CHIP-0007",
-        name: row["Filename"],
+        name: row["Name"],
         description: row["Description"],
         series_number: row["Series Number"],
       };
