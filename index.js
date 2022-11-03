@@ -25,10 +25,15 @@ const argv = yargs(hideBin(process.argv))
   ).argv;
 
 let csvWriter;
+let currentTeamName = "";
 const records = [];
+const nfts = [];
 const filePath = argv.file;
 const filename = path.basename(filePath, ".csv");
-const outputDir = argv.output; //? argv.output : ".";
+const outputDir = argv.output;
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
 
 fs.createReadStream(filePath)
   .pipe(csv.parse({ headers: true }))
@@ -49,16 +54,35 @@ fs.createReadStream(filePath)
     records.push(headerRow);
   })
   .on("data", (row) => {
+    const temp = row["Series Number"] ?? "";
+    if (temp.toLowerCase().startsWith("team")) {
+      currentTeamName = temp;
+    }
+
     if (row["Filename"]) {
+      nfts.push({ ...row, Team: currentTeamName });
+      records.push(row);
+    } else {
+      // this is not a row that needs to be processed (not a valid NFT)
+      // just add it to the records so that we do not skip it when regenerating the CSV
+      records.push(row);
+    }
+  })
+  .on("close", () => {
+    // Process the NFTs
+    nfts.forEach((nft) => {
       const jsonData = {
         format: "CHIP-0007",
-        name: row["Name"],
-        description: row["Description"],
-        series_number: row["Series Number"],
+        name: nft["Name"],
+        description: nft["Description"],
+        minting_tool: nft["Team"],
+        sensitive_content: false,
+        series_number: nft["Series Number"],
+        series_total: nfts.length,
         attributes: [
           {
             trait_type: "gender",
-            value: row["Gender"],
+            value: nft["Gender"],
           },
         ],
         collection: {
@@ -74,9 +98,9 @@ fs.createReadStream(filePath)
       };
 
       // Add more attributes field if available
-      if (row["Attributes"]) {
+      if (nft["Attributes"]) {
         const attributes = [];
-        row["Attributes"].split(",").forEach((attribute) => {
+        nft["Attributes"].split(",").forEach((attribute) => {
           if (attribute) {
             try {
               const values = attribute.split(":");
@@ -106,18 +130,13 @@ fs.createReadStream(filePath)
         .digest("hex");
 
       // Create the JSON file
-      fs.writeFileSync(`${outputDir}/${row["Filename"]}.json`, stringifiedJson);
+      fs.writeFileSync(`${outputDir}/${nft["Filename"]}.json`, stringifiedJson);
 
       // Store the hash and the record to our list
-      row["Hash"] = hashedJson;
-      records.push(row);
-    } else {
-      // this is not a row that needs to be processed
-      // just add it to the records so that we do not skip it when regenerating the CSV
-      records.push(row);
-    }
-  })
-  .on("close", () => {
+      nft["Hash"] = hashedJson;
+    });
+
+    // Write the CSV
     csvWriter
       .writeRecords(records)
       .then(() => console.log("Processing done!"))
