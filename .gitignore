@@ -126,5 +126,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# test JSON files
+# test JSON files and CSV
 files/
+*.output.csv
