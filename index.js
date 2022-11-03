@@ -77,7 +77,7 @@ fs.createReadStream(filePath)
         description: nft["Description"],
         minting_tool: nft["Team"],
         sensitive_content: false,
-        series_number: nft["Series Number"],
+        series_number: parseInt(nft["Series Number"]),
         series_total: nfts.length,
         attributes: [
           {
@@ -99,7 +99,6 @@ fs.createReadStream(filePath)
 
       // Add more attributes field if available
       if (nft["Attributes"]) {
-        const attributes = [];
         nft["Attributes"].split(",").forEach((attribute) => {
           if (attribute) {
             try {
@@ -107,7 +106,7 @@ fs.createReadStream(filePath)
               const traitType = values[0].trim();
               const value = values[1].trim();
 
-              attributes.push({
+              jsonData["attributes"].push({
                 trait_type: traitType,
                 value: value,
               });
@@ -117,8 +116,6 @@ fs.createReadStream(filePath)
             }
           }
         });
-
-        jsonData["attributes"] = attributes;
       }
 
       const stringifiedJson = JSON.stringify(jsonData);
