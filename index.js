@@ -55,6 +55,7 @@ fs.createReadStream(filePath)
     records.push(headerRow);
   })
   .on("data", (row) => {
+    // Resolve team name
     const temp = row["TEAM NAMES"] ?? "";
     if (temp.toLowerCase().startsWith("team")) {
       currentTeamName = temp;
