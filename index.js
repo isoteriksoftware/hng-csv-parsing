@@ -16,7 +16,8 @@ const argv = yargs(hideBin(process.argv))
   .option("o", {
     alias: "output",
     demandOption: false,
-    describe: "The path to the input CSV file",
+    describe:
+      "The path to output the JSON files (the folder will be created if it doesn't exist)",
     type: "string",
     default: ".",
   })
