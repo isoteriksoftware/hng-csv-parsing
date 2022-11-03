@@ -128,4 +128,4 @@ dist
 
 # test JSON files and CSV
 files/
-*.output.csv
+/*.output.csv
