@@ -55,7 +55,7 @@ fs.createReadStream(filePath)
     records.push(headerRow);
   })
   .on("data", (row) => {
-    const temp = row["Series Number"] ?? "";
+    const temp = row["TEAM NAMES"] ?? "";
     if (temp.toLowerCase().startsWith("team")) {
       currentTeamName = temp;
     }
@@ -115,7 +115,7 @@ fs.createReadStream(filePath)
               // this was most likely caused by bad input
               console.log(
                 "Invalid attribute format:",
-                attribute,
+                `"${attribute}"`,
                 "of NFT:",
                 nft
               );
