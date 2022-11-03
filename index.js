@@ -100,7 +100,7 @@ fs.createReadStream(filePath)
 
       // Add more attributes field if available
       if (nft["Attributes"]) {
-        nft["Attributes"].split(",").forEach((attribute) => {
+        nft["Attributes"].split(";").forEach((attribute) => {
           if (attribute) {
             try {
               const values = attribute.split(":");
