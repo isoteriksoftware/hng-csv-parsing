@@ -13,14 +13,22 @@ const argv = yargs(hideBin(process.argv))
     describe: "The path to the input CSV file",
     type: "string",
   })
-  .usage("Usage: $0 --file [csvFilePath]").argv;
-if (!argv.file) {
-}
+  .option("o", {
+    alias: "output",
+    demandOption: false,
+    describe: "The path to the input CSV file",
+    type: "string",
+    default: ".",
+  })
+  .usage(
+    "Usage: $0 --file [csv file path] --output [output directory for the JSON files]"
+  ).argv;
 
 let csvWriter;
 const records = [];
 const filePath = argv.file;
 const filename = path.basename(filePath, ".csv");
+const outputDir = argv.output; //? argv.output : ".";
 
 fs.createReadStream(filePath)
   .pipe(csv.parse({ headers: true }))
@@ -47,9 +55,25 @@ fs.createReadStream(filePath)
         name: row["Name"],
         description: row["Description"],
         series_number: row["Series Number"],
+        attributes: [
+          {
+            trait_type: "gender",
+            value: row["Gender"],
+          },
+        ],
+        collection: {
+          name: "Zuri NFT Tickets for Free Lunch",
+          id: "b774f676-c1d5-422e-beed-00ef5510c64d",
+          attributes: [
+            {
+              type: "description",
+              value: "Rewards for accomplishments during HNGi9.",
+            },
+          ],
+        },
       };
 
-      // Create the attributes field if available
+      // Add more attributes field if available
       if (row["Attributes"]) {
         const attributes = [];
         row["Attributes"].split(",").forEach((attribute) => {
@@ -82,7 +106,7 @@ fs.createReadStream(filePath)
         .digest("hex");
 
       // Create the JSON file
-      //fs.writeFileSync(`${row["Filename"]}.json`, stringifiedJson);
+      fs.writeFileSync(`${outputDir}/${row["Filename"]}.json`, stringifiedJson);
 
       // Store the hash and the record to our list
       row["Hash"] = hashedJson;
