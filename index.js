@@ -136,7 +136,11 @@ fs.createReadStream(filePath)
       fs.writeFileSync(`${outputDir}/${nft["Filename"]}.json`, stringifiedJson);
 
       // Store the hash and the record to our list
-      nft["Hash"] = hashedJson;
+      records.forEach((row) => {
+        if (row["UUID"] === nft["UUID"]) {
+          row["Hash"] = hashedJson;
+        }
+      });
     });
 
     // Write the CSV
