@@ -113,7 +113,12 @@ fs.createReadStream(filePath)
               });
             } catch (err) {
               // this was most likely caused by bad input
-              console.log("Invalid attribute format: ", attribute);
+              console.log(
+                "Invalid attribute format:",
+                attribute,
+                "of NFT:",
+                nft
+              );
             }
           }
         });
