@@ -3,10 +3,23 @@ const path = require("path");
 const csv = require("fast-csv");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const crypto = require("crypto");
+const yargs = require("yargs/yargs");
+const { hideBin } = require("yargs/helpers");
+
+const argv = yargs(hideBin(process.argv))
+  .option("f", {
+    alias: "file",
+    demandOption: true,
+    describe: "The path to the input CSV file",
+    type: "string",
+  })
+  .usage("Usage: $0 --file [csvFilePath]").argv;
+if (!argv.file) {
+}
 
 let csvWriter;
 const records = [];
-const filePath = "./team.csv";
+const filePath = argv.file;
 const filename = path.basename(filePath, ".csv");
 
 fs.createReadStream(filePath)
@@ -40,18 +53,20 @@ fs.createReadStream(filePath)
       if (row["Attributes"]) {
         const attributes = [];
         row["Attributes"].split(",").forEach((attribute) => {
-          try {
-            const values = attribute.split(":");
-            const traitType = values[0].trim();
-            const value = values[1].trim();
+          if (attribute) {
+            try {
+              const values = attribute.split(":");
+              const traitType = values[0].trim();
+              const value = values[1].trim();
 
-            attributes.push({
-              trait_type: traitType,
-              value: value,
-            });
-          } catch (err) {
-            // this was most likely caused by bad input
-            console.log(err);
+              attributes.push({
+                trait_type: traitType,
+                value: value,
+              });
+            } catch (err) {
+              // this was most likely caused by bad input
+              console.log("Invalid attribute format: ", attribute);
+            }
           }
         });
 
